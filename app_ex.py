@@ -86,30 +86,31 @@ def format_option(opt):
     return f"{flag_emoji} {opt}"
 
 # Vytvoření vstupu pro základní měnu
-base_currency = st.selectbox('Vyberte základní měnu:', currencies, index=currencies.index('EUR'), format_func=format_option)
+base_currency = st.selectbox('**Vyberte základní měnu:**', currencies, index=currencies.index('EUR'), format_func=format_option)
 
 # Vytvoření vstupu pro cílovou měnu
-target_currency = st.selectbox('Vyberte cílovou měnu:', currencies, index=currencies.index('CZK'), format_func=format_option)
+target_currency = st.selectbox('**Vyberte cílovou měnu:**', currencies, index=currencies.index('CZK'), format_func=format_option)
 
 # Vytvoření vstupu pro množství
-amount = st.number_input('Zadejte množství:', value=1)
+amount = st.number_input('**Zadejte množství:**', value=1)
 
 # Vytvoření vstupu pro datum
 dnes = datetime.now()
 max_date = dnes.date()
-date = st.date_input('Vyber datum pro převod měn:', value=max_date, max_value=max_date)
+date = st.date_input('**Vyber datum pro převod měn:**', value=max_date, max_value=max_date)
 
 # Update converter with selected date
 converter = Converter(date.strftime("%d.%m.%Y"))
+
 
 # Tlačítko pro přepočet
 if st.button('Spočítat'):
     # Kontrola, zda jsou základní a cílová měna různé
     if base_currency != target_currency:
         # Výpočet převedeného množství
-        converted_amount = converter.convert(amount, base_currency, target_currency)
+        converted_amount = "{:,.2f}".format(converter.convert(amount, base_currency, target_currency)).replace(",", " ").replace(".", ",")
 
         # Zobrazení výsledku
-        st.markdown(f'<div style="font-size: 16px; text-align: center;"><div style="border: 1px solid red; padding: 10px; color: red; border-radius: 5px; display: inline-block;">{amount} {base_currency} = {converted_amount} {target_currency}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-size: 15px; text-align: center;"><div style="border: 1px solid red; padding: 10px; color: red; border-radius: 5px; display: inline-block;">{amount} {base_currency} = {converted_amount} {target_currency}</div></div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div style="font-size: 16px; text-align: center;"><div style="border: 1px solid red; padding: 10px; color: red; border-radius: 5px; display: inline-block;">Základní a cílová měna nemohou být stejné.', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-size: 15px; text-align: center;"><div style="border: 1px solid red; padding: 10px; color: red; border-radius: 5px; display: inline-block;">Základní a cílová měna nemohou být stejné.', unsafe_allow_html=True)
