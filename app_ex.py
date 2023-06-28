@@ -110,11 +110,7 @@ if st.button('Spočítat'):
         converted_amount = converter.convert(amount, base_currency, target_currency)
 
         # Zobrazení výsledku
-        st.write(f'{amount} {base_currency} = {converted_amount} {target_currency}')
+        st.markdown(f'<div style="border: 1px solid red; padding: 10px; color: red; border-radius: 5px; display: inline-block;">{amount} {base_currency} = {converted_amount} {target_currency}</div>', unsafe_allow_html=True)
     else:
-        st.write('Základní a cílová měna nemohou být stejné.')
-
-
-
-
+        st.markdown(f'<div style="border: 1px solid red; padding: 10px; color: red; border-radius: 5px; display: inline-block;">Základní a cílová měna nemohou být stejné.', unsafe_allow_html=True)
 
