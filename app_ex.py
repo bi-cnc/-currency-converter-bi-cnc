@@ -37,7 +37,7 @@ class Converter:
 st.title('Převodník měn – měnová kalkulačka')
 
 # Initiate converter with selected date
-converter = Converter("15.06.2023")
+converter = Converter("30.08.2023")
 
 # Získání seznamu měn
 currencies = list(converter.rates.keys())
