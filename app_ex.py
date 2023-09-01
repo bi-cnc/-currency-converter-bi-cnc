@@ -10,7 +10,8 @@ class Converter:
         self.rates = self.get_rates()
 
     def get_rates(self):
-        response = requests.get(self.url)  # Increase the timeout value as needed)
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+        response = requests.get(self.url, headers=headers)
         soup = BeautifulSoup(response.text, 'html.parser')
         table = soup.find_all('table')[0] 
         rows = table.find_all('tr')
