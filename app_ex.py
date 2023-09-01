@@ -10,7 +10,7 @@ class Converter:
         self.rates = self.get_rates()
 
     def get_rates(self):
-        response = requests.get(self.url)
+        response = requests.get(self.url,timeout=10)  # Increase the timeout value as needed)
         soup = BeautifulSoup(response.text, 'html.parser')
         table = soup.find_all('table')[0] 
         rows = table.find_all('tr')
