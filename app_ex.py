@@ -114,3 +114,4 @@ if st.button('Spočítat'):
         st.markdown(f'<div style="font-size: 15px; text-align: center;"><div style="background-color: #FA3A3C; padding: 10px; color: white; border-radius: 5px; display: inline-block;font-weight: bold;">{amount} {base_currency} = {converted_amount} {target_currency}</div></div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div style="font-size: 15px; text-align: center;"><div style="background-color: #FA3A3C; padding: 10px; color: white; border-radius: 5px; display: inline-block;font-weight: bold;">Základní a cílová měna nemohou být stejné.', unsafe_allow_html=True)
+
