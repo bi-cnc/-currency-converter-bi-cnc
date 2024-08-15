@@ -4,32 +4,27 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import flag
 
-st.write("Starting app...")
-
 class Converter:
     def __init__(self, date):
         self.url = f'https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/index.html?date={date}'
         self.rates = self.get_rates()
 
     def get_rates(self):
-        st.write("Fetching rates from:", self.url)
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
         response = requests.get(self.url, headers=headers)
-        st.write("Response status code:", response.status_code)
         soup = BeautifulSoup(response.text, 'html.parser')
-        st.write("HTML parsed successfully.")
-            table = soup.find_all('table')[0] 
-            rows = table.find_all('tr')
-            rates = {'CZK': (1, 1)}  # Add a rate for CZK to itself
-            for row in rows[1:]:
-                data = row.find_all('td')
-                country = data[0].text
-                currency = data[1].text
-                quantity = float(data[2].text)
-                code = data[3].text
-                rate = float(data[4].text.replace(',', '.'))
-                rates[code] = (rate, quantity)
-            return rates
+        table = soup.find_all('table')[0] 
+        rows = table.find_all('tr')
+        rates = {'CZK': (1, 1)}  # Add a rate for CZK to itself
+        for row in rows[1:]:
+            data = row.find_all('td')
+            country = data[0].text
+            currency = data[1].text
+            quantity = float(data[2].text)
+            code = data[3].text
+            rate = float(data[4].text.replace(',', '.'))
+            rates[code] = (rate, quantity)
+        return rates
 
     def convert(self, amount, from_currency, to_currency):
         to_czk_rate, to_czk_quantity = self.rates[from_currency]
@@ -42,9 +37,8 @@ class Converter:
 # Zobrazení názvu aplikace
 st.title('Převodník měn – měnová kalkulačka')
 
-st.write("Initializing converter...")
+# Initiate converter with selected date
 converter = Converter("30.08.2023")
-st.write("Converter initialized successfully.")
 
 # Získání seznamu měn
 currencies = list(converter.rates.keys())
@@ -121,4 +115,3 @@ if st.button('Spočítat'):
         st.markdown(f'<div style="font-size: 15px; text-align: center;"><div style="background-color: #FA3A3C; padding: 10px; color: white; border-radius: 5px; display: inline-block;font-weight: bold;">{amount} {base_currency} = {converted_amount} {target_currency}</div></div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div style="font-size: 15px; text-align: center;"><div style="background-color: #FA3A3C; padding: 10px; color: white; border-radius: 5px; display: inline-block;font-weight: bold;">Základní a cílová měna nemohou být stejné.', unsafe_allow_html=True)
-
