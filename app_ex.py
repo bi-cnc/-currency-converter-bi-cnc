@@ -4,15 +4,20 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import flag
 
+st.write("Starting app...")
+
 class Converter:
     def __init__(self, date):
         self.url = f'https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/index.html?date={date}'
         self.rates = self.get_rates()
 
     def get_rates(self):
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
-        response = requests.get(self.url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
+    st.write("Fetching rates from:", self.url)
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+    response = requests.get(self.url, headers=headers)
+    st.write("Response status code:", response.status_code)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    st.write("HTML parsed successfully.")
         table = soup.find_all('table')[0] 
         rows = table.find_all('tr')
         rates = {'CZK': (1, 1)}  # Add a rate for CZK to itself
@@ -37,8 +42,9 @@ class Converter:
 # Zobrazení názvu aplikace
 st.title('Převodník měn – měnová kalkulačka')
 
-# Initiate converter with selected date
+st.write("Initializing converter...")
 converter = Converter("30.08.2023")
+st.write("Converter initialized successfully.")
 
 # Získání seznamu měn
 currencies = list(converter.rates.keys())
