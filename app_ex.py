@@ -32,9 +32,7 @@ class Converter:
                 tables = soup.find_all('table')
 
                 if tables:
-                    # ✅ ÚSPĚCH: Tabulka nalezena. Kurzy stáhneme a rovnou vrátíme.
-                    # POZNÁMKA: Původní st.info zpráva byla ZDE a byla odstraněna.
-                    
+                    # ✅ ÚSPĚCH: Tabulka nalezena.
                     table = tables[0]
                     rows = table.find_all('tr')
                     rates = {'CZK': (1, 1)}  # Přidání kurzu CZK k sobě
@@ -65,8 +63,6 @@ class Converter:
                 
             except requests.exceptions.RequestException as e:
                 # Chyba při připojení nebo HTTP chyba
-                # Tuto varovnou zprávu (st.warning) pro interní debug můžete také odstranit, 
-                # pokud nechcete, aby se objevovala při každé chybě připojení.
                 st.warning(f"Chyba při stahování dat pro {date_to_fetch}. Zkouším předchozí den.") 
             except IndexError:
                 # Tabulka nebyla nalezena (o víkendu/svátku nebo budoucí datum)
@@ -133,8 +129,8 @@ if st.button('Spočítat'):
         converted_amount_float = converter.convert(amount, base_currency, target_currency)
         converted_amount = "{:,.2f}".format(converted_amount_float).replace(",", " ").replace(".", ",")
 
-        # Zobrazení výsledku
-        st.markdown(f'<div style="font-size: 15px; text-align: center;"><div style="background-color: #0078D4; padding: 10px; color: white; border-radius: 5px; display: inline-block;font-weight: bold;">{amount:.2f} {base_currency} = {converted_amount} {target_currency}</div></div>', unsafe_allow_html=True)
+        # Zobrazení výsledku (vrácena původní červená barva #FA3A3C)
+        st.markdown(f'<div style="font-size: 15px; text-align: center;"><div style="background-color: #FA3A3C; padding: 10px; color: white; border-radius: 5px; display: inline-block;font-weight: bold;">{amount:.2f} {base_currency} = {converted_amount} {target_currency}</div></div>', unsafe_allow_html=True)
     elif len(converter.rates) <= 1:
         st.error('Nelze provést převod, protože se nepodařilo stáhnout kurzy jiných měn než CZK.')
     else:
