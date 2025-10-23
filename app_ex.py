@@ -22,40 +22,42 @@ class Converter:
             self.url = f'https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/index.html?date={date_to_fetch}'
             
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+            
             try:
                 response = requests.get(self.url, headers=headers, timeout=5)
                 # Použijeme stavy 4xx/5xx jako chybu
                 response.raise_for_status() 
                 soup = BeautifulSoup(response.text, 'html.parser')
                 
-                # Zde dojde k původní chybě: IndexError, pokud tabulka neexistuje
                 tables = soup.find_all('table')
 
                 if tables:
-                    # Pokud se tabulka najde, vrátíme kurzy
-                    st.info(f"Kurzy staženy pro datum: **{date_to_fetch}**")
+                    # ✅ ÚSPĚCH: Tabulka nalezena. Kurzy stáhneme a rovnou vrátíme.
+                    # POZNÁMKA: Původní st.info zpráva byla ZDE a byla odstraněna.
+                    
                     table = tables[0]
                     rows = table.find_all('tr')
                     rates = {'CZK': (1, 1)}  # Přidání kurzu CZK k sobě
                     
                     for row in rows[1:]:
                         data = row.find_all('td')
-                        # Kontrola, zda má řádek dostatek sloupců
                         if len(data) >= 5:
                             country = data[0].text
                             currency = data[1].text
-                            # Ošetření, že Quantity je číslo
+                            
                             try:
-                                quantity = float(data[2].text.replace('\xa0', ''))
+                                # Odstranění neměnných mezer a převod na číslo
+                                quantity = float(data[2].text.replace('\xa0', '').strip())
                             except ValueError:
                                 quantity = 1.0
 
                             code = data[3].text
-                            # Ošetření čárky jako oddělovače desetinných míst
+                            
                             try:
-                                rate = float(data[4].text.replace('\xa0', '').replace(',', '.'))
+                                # Ošetření čárky jako oddělovače desetinných míst
+                                rate = float(data[4].text.replace('\xa0', '').replace(',', '.').strip())
                             except ValueError:
-                                continue # Přeskočí řádek, pokud se nepovede parsovat kurz
+                                continue
                             
                             rates[code] = (rate, quantity)
                     
@@ -63,7 +65,9 @@ class Converter:
                 
             except requests.exceptions.RequestException as e:
                 # Chyba při připojení nebo HTTP chyba
-                st.warning(f"Chyba při stahování dat pro {date_to_fetch}: {e}. Zkouším předchozí den.")
+                # Tuto varovnou zprávu (st.warning) pro interní debug můžete také odstranit, 
+                # pokud nechcete, aby se objevovala při každé chybě připojení.
+                st.warning(f"Chyba při stahování dat pro {date_to_fetch}. Zkouším předchozí den.") 
             except IndexError:
                 # Tabulka nebyla nalezena (o víkendu/svátku nebo budoucí datum)
                 pass # Pokračujeme na další den
@@ -76,19 +80,15 @@ class Converter:
         return {'CZK': (1, 1)}
 
     def convert(self, amount, from_currency, to_currency):
-        # Funkce convert zůstává beze změny
         to_czk_rate, to_czk_quantity = self.rates.get(from_currency, (0, 1))
         to_currency_rate, to_currency_quantity = self.rates.get(to_currency, (0, 1))
 
         if to_czk_rate == 0 or to_currency_rate == 0:
-             # V případě chyby v datech (např. return {'CZK': (1, 1)}), vrátíme 0
              return 0.0
 
         czk_amount = (amount / to_czk_quantity) * to_czk_rate
         converted_amount = (czk_amount / to_currency_rate) * to_currency_quantity
         return round(converted_amount, 2)
-
-# ... Zbytek aplikace (st.title, dictionary, format_option, st.selectbox, st.number_input) ...
 
 # Zobrazení názvu aplikace
 st.title('Převodník měn – měnová kalkulačka')
@@ -109,7 +109,6 @@ def format_option(opt):
 
 # Vytvoření vstupu pro datum
 dnes = datetime.now()
-# Ponecháme volnou ruku pro max_value, aby šlo vybrat i budoucí datum (s vědomím chyby)
 date = st.date_input('**Vyber datum pro převod měn:**', value=dnes.date())
 
 # Zde se inicializuje Converter s logikou pro opakované pokusy o stažení
@@ -119,7 +118,6 @@ converter = Converter(date.strftime("%d.%m.%Y"))
 currencies = list(converter.rates.keys())
 
 # Vytvoření vstupů pro měny a množství
-# Nastavení výchozích hodnot, i když by kurzy mohly být jen pro CZK (kvůli chybě)
 default_base = 'EUR' if 'EUR' in currencies else 'CZK'
 default_target = 'CZK' if 'CZK' in currencies else list(currencies)[0]
 
@@ -130,7 +128,7 @@ amount = st.number_input('**Zadejte množství:**', value=1.0, min_value=0.01)
 
 # Tlačítko pro přepočet
 if st.button('Spočítat'):
-    if base_currency != target_currency and len(converter.rates) > 1: # Kontrola, zda jsou data (více než jen CZK)
+    if base_currency != target_currency and len(converter.rates) > 1:
         # Výpočet převedeného množství
         converted_amount_float = converter.convert(amount, base_currency, target_currency)
         converted_amount = "{:,.2f}".format(converted_amount_float).replace(",", " ").replace(".", ",")
